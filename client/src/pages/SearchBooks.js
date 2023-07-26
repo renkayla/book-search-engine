@@ -61,26 +61,37 @@ const SearchBooks = () => {
 
   // create function to handle saving a book to our database
   const handleSaveBook = async (bookId) => {
-    const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-
+    // find the book in `searchedBooks` state by the matching id
+    const bookToSave = searchedBooks.find((book) => book.id === bookId);
+  
     // get token
-    const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-    if (!token) {
-        return false;
-    }
-
+    const token = localStorage.getItem('id_token');
+  
     try {
-        await saveBook({
-            variables: { input: bookToSave },
-        });
-
-        setSavedBookIds([...savedBookIds, bookToSave.bookId]);
+      const mutationResponse = await saveBook({
+        variables: {
+          input: {
+            bookId: bookToSave.id,
+            authors: bookToSave.volumeInfo.authors,
+            description: bookToSave.volumeInfo.description,
+            title: bookToSave.volumeInfo.title,
+            image: bookToSave.volumeInfo.imageLinks.thumbnail,
+            link: bookToSave.volumeInfo.previewLink,
+          },
+        },
+      });
+  
+      if (!mutationResponse) {
+        throw new Error('something went wrong!');
+      }
+  
+      // upon success, save book id to state
+      setSavedBookIds([...savedBookIds, bookToSave.id]);
     } catch (err) {
-        console.error(err);
+      console.error(err);
     }
-    
-};
+  };
+  
 
 if (error) {
   return <p>Error occurred: {error.message}</p>;
