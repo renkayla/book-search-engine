@@ -5,7 +5,7 @@ import { Form, Button, Alert } from 'react-bootstrap';
 import { useMutation } from '@apollo/client';
 
 // Import the LOGIN_USER mutation
-import { LOGIN_USER } from '../utils/mutations';
+import { LOGIN_USER } from '../graphql/mutations';
 
 import Auth from '../utils/auth';
 
@@ -16,6 +16,9 @@ const LoginForm = () => {
 
   // useMutation hook
   const [loginUser, { error }] = useMutation(LOGIN_USER);
+  if (error) {
+    return <p>Error occurred: {error.message}</p>;
+};
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;

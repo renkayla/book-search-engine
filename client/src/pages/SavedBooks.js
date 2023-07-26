@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
-import { useQuery, useMutation } from '@apollo/react-hooks';
-import { GET_ME } from '../utils/queries';
-import { REMOVE_BOOK } from '../utils/mutations';
+import { Row, Container, Col, Card, Button } from 'react-bootstrap';
+import { useQuery, useMutation } from '@apollo/client';
+import { GET_ME } from '../graphql/queries';
+import { REMOVE_BOOK } from '../graphql/mutations';
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
@@ -10,13 +10,16 @@ const SavedBooks = () => {
   // create state for holding returned api data
   const [userData, setUserData] = useState({});
   // create state for holding bookId to remove
-  const [removeBookId, setRemoveBookId] = useState('');
+ // const [removeBookId, setRemoveBookId] = useState('');
 
   // create mutation for removing a book
   const [removeBook, { error }] = useMutation(REMOVE_BOOK);
 
+
   // use this to determine if `useEffect()` hook needs to run again
   const userDataLength = Object.keys(userData).length;
+  <p>User has {userDataLength} books.</p>
+
 
   const { loading, data } = useQuery(GET_ME);
 
@@ -45,7 +48,7 @@ const SavedBooks = () => {
 
       // set up userData to use the new list of books
       setUserData(data.removeBook);
-      setRemoveBookId('');
+      //setRemoveBookId('');
     } catch (err) {
       console.error(err);
     }
@@ -54,6 +57,11 @@ const SavedBooks = () => {
   if (loading) {
     return <h2>LOADING...</h2>;
   }
+  
+if (error) {
+  return <p>Error occurred: {error.message}</p>;
+}
+
 
   return (
     <>

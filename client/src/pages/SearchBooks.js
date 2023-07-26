@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Col, Form, Button, Card, Row } from 'react-bootstrap';
-import { useMutation } from '@apollo/react-hooks';
-import { SAVE_BOOK } from '../utils/mutations';
+import { useMutation } from '@apollo/client';
+import { SAVE_BOOK } from '../graphql/mutations';
 import Auth from '../utils/auth';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 
@@ -17,10 +17,21 @@ const SearchBooks = () => {
     // set up the mutation for saving a book
     const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
+
     // set state for book data for useEffect
     useEffect(() => {
-        return () => saveBookIds(savedBookIds);
-    });
+      saveBookIds(savedBookIds);
+    }, [savedBookIds]);
+    
+
+    const searchGoogleBooks = async (query) => {
+      const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}`);
+      if (!response.ok) {
+          throw new Error('something went wrong!');
+      }
+      const data = await response.json();
+      return data;
+  };
 
     const handleFormSubmit = async (event) => {
         event.preventDefault();
@@ -29,14 +40,9 @@ const SearchBooks = () => {
       return false;
     }
 
+    
     try {
-      const response = await searchGoogleBooks(searchInput);
-
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
-
-      const { items } = await response.json();
+      const { items } = await searchGoogleBooks(searchInput);
 
       const bookData = items.map((book) => ({
         bookId: book.id,
@@ -51,7 +57,7 @@ const SearchBooks = () => {
     } catch (err) {
       console.error(err);
     }
-  };
+};
 
   // create function to handle saving a book to our database
   const handleSaveBook = async (bookId) => {
@@ -73,9 +79,12 @@ const SearchBooks = () => {
     } catch (err) {
         console.error(err);
     }
+    
 };
 
-
+if (error) {
+  return <p>Error occurred: {error.message}</p>;
+}
   return (
     <>
       <div className='text-light bg-dark pt-5'>
